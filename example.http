@@ -1,7 +1,7 @@
-POST http://localhost:5000/api/chat
+POST https://searchee.onrender.com/api/chat
 Content-Type: application/json
 Accept: application/json
 
 {
-    "message": "Explain machine learning"
+    "message": "learn"
 }
