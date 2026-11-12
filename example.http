@@ -1,0 +1,7 @@
+POST http://localhost:5000/api/chat
+Content-Type: application/json
+Accept: application/json
+
+{
+    "message": "Explain machine learning"
+}
