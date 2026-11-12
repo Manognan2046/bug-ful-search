@@ -1,26 +1,36 @@
-function SectionHeading({ number, title }) {
-  return (
-    <h3 className="result-section-title">
-      <span>{number}.</span>
-      {title}
-    </h3>
-  );
+const hasItems = (value) => Array.isArray(value) && value.length > 0;
+
+function SectionHeading({ title }) {
+  return <h3 className="result-section-title">{title}</h3>;
 }
 
-function PronunciationSection({ pronunciation }) {
-  if (!pronunciation) return null;
+function Aside({ analysis }) {
+  const { word, pronunciation, part_of_speech: pos } = analysis;
 
   return (
-    <section className="result-section pronunciation-section">
-      <SectionHeading number="1" title="Pronunciation" />
-      <p className="pronunciation-word">{pronunciation.word}</p>
-      {pronunciation.phonetic && (
-        <p><strong>Phonetic spelling:</strong> {pronunciation.phonetic}</p>
+    <aside className="result-aside">
+      <h2 className="result-word">{word}</h2>
+      {pos?.primary && <span className="pos-tag">{pos.primary}</span>}
+
+      {(pronunciation?.phonetic || pronunciation?.ipa) && (
+        <div className="pronunciation">
+          {pronunciation.phonetic && (
+            <p><strong>Say it:</strong> {pronunciation.phonetic}</p>
+          )}
+          {pronunciation.ipa && (
+            <p><strong>IPA:</strong> <span className="ipa">{pronunciation.ipa}</span></p>
+          )}
+        </div>
       )}
-      {pronunciation.ipa && (
-        <p><strong>IPA:</strong> <span className="ipa">{pronunciation.ipa}</span></p>
+
+      {hasItems(pos?.related_forms) && (
+        <ul className="forms-list" aria-label="Related forms">
+          {pos.related_forms.map((form, index) => (
+            <li key={`${form}-${index}`}>{form}</li>
+          ))}
+        </ul>
       )}
-    </section>
+    </aside>
   );
 }
 
@@ -29,18 +39,17 @@ function EtymologySection({ etymology }) {
 
   return (
     <section className="result-section">
-      <SectionHeading number="2" title="Etymology" />
+      <SectionHeading title="Where it comes from" />
       {etymology.origin && <p>{etymology.origin}</p>}
       {etymology.original_meaning && (
         <p><strong>Original meaning:</strong> {etymology.original_meaning}</p>
       )}
-      {Array.isArray(etymology.roots) && etymology.roots.length > 0 && (
-        <div className="result-list-block">
-          <strong>Roots:</strong>
-          <ul>
-            {etymology.roots.map((root, index) => <li key={`${root}-${index}`}>{root}</li>)}
-          </ul>
-        </div>
+      {hasItems(etymology.roots) && (
+        <ol className="lineage" aria-label="Roots">
+          {etymology.roots.map((root, index) => (
+            <li key={`${root}-${index}`}>{root}</li>
+          ))}
+        </ol>
       )}
       {etymology.semantic_development && <p>{etymology.semantic_development}</p>}
     </section>
@@ -52,12 +61,12 @@ function MeaningSection({ meaning }) {
 
   return (
     <section className="result-section">
-      <SectionHeading number="3" title="Meaning" />
+      <SectionHeading title="What it means" />
       {meaning.definition && <p>{meaning.definition}</p>}
       {meaning.nuance && <p>{meaning.nuance}</p>}
-      {Array.isArray(meaning.connotations) && meaning.connotations.length > 0 && (
+      {hasItems(meaning.connotations) && (
         <div className="result-list-block">
-          <strong>Connotations:</strong>
+          <strong>Connotations</strong>
           <ul>
             {meaning.connotations.map((item, index) => (
               <li key={`${item}-${index}`}>{item}</li>
@@ -69,34 +78,13 @@ function MeaningSection({ meaning }) {
   );
 }
 
-function PartOfSpeechSection({ partOfSpeech }) {
-  if (!partOfSpeech) return null;
-
-  return (
-    <section className="result-section">
-      <SectionHeading number="4" title="Part of Speech" />
-      {partOfSpeech.primary && <p><strong>Primary:</strong> {partOfSpeech.primary}</p>}
-      {Array.isArray(partOfSpeech.related_forms) && partOfSpeech.related_forms.length > 0 && (
-        <ul className="forms-list">
-          {partOfSpeech.related_forms.map((form, index) => (
-            <li key={`${form}-${index}`}>{form}</li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
-
 function RelatedWordsSection({ words }) {
-  if (!Array.isArray(words) || words.length === 0) return null;
+  if (!hasItems(words)) return null;
 
   return (
     <section className="result-section related-words-section">
-      <SectionHeading number="5" title="Related Words" />
+      <SectionHeading title="Words from the same family" />
       <div className="related-words">
-        <div className="related-words-labels" aria-hidden="true">
-          <span>Word</span><span>Meaning</span><span>Etymological connection</span>
-        </div>
         {words.map((item, index) => (
           <article className="related-word-row" key={`${item.word}-${index}`}>
             <h4>{item.word}</h4>
@@ -112,14 +100,10 @@ function RelatedWordsSection({ words }) {
 export default function WordResult({ analysis }) {
   return (
     <article className="word-result">
-      <h2 className="result-word">{analysis.word}</h2>
+      <Aside analysis={analysis} />
       <div className="result-sections">
-        <PronunciationSection
-          pronunciation={{ ...analysis.pronunciation, word: analysis.word }}
-        />
         <EtymologySection etymology={analysis.etymology} />
         <MeaningSection meaning={analysis.meaning} />
-        <PartOfSpeechSection partOfSpeech={analysis.part_of_speech} />
         <RelatedWordsSection words={analysis.related_words} />
       </div>
     </article>
