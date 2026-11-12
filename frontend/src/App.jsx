@@ -2,6 +2,8 @@ import { useState } from "react";
 import WordResult from "./components/WordResult.jsx";
 import "./App.css";
 
+const API_URL = "https://searchee.onrender.com/api/chat";
+
 function App() {
   const [word, setWord] = useState("");
   const [result, setResult] = useState(null);
@@ -19,7 +21,7 @@ function App() {
     setResult(null);
 
     try {
-      const response = await fetch("http://localhost:5000/api/chat", {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: searchTerm }),
